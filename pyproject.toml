@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "Medical MAS"
+version = "0.1.0"
+description = "An AI MAS that will communicate and aid in medical emergencies"
+authors = ["Zehaan Walji, Joao Moura, Brandon Hancock, Reyansh Badhwar, Parshva Dave"]
+
+[tool.poetry.dependencies]
+python = ">=3.10.0, <4.0"
+crewai = "0.1.24"
+unstructured = '==0.10.25'
+pyowm = '3.3.0'
+python-dotenv = "1.0.0"
+langchain-openai = "^0.0.5"
+twilio = "^9.3.8"
+
+[tool.pyright]
+# https://github.com/microsoft/pyright/blob/main/docs/configuration.md
+useLibraryCodeForTypes = true
+exclude = [".cache"]
+
+[tool.ruff]
+# https://beta.ruff.rs/docs/configuration/
+select = ['E', 'W', 'F', 'I', 'B', 'C4', 'ARG', 'SIM']
+ignore = ['W291', 'W292', 'W293']
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

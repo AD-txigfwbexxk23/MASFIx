@@ -1,0 +1,4 @@
+https://platform.openai.com/settings/organization/api-keys
+https://console.twilio.com/
+https://serper.dev/dashboard
+https://console.anthropic.com/settings/keys
