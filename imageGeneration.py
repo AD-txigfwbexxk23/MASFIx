@@ -12,7 +12,7 @@ class GetImage:
         #Creating an empty list to store all the images
         links=[]
 
-        API_KEY = "AIzaSyAyy1rWtZbXsHAk6lUGXSiAPtbbCs3UcnA"  # Replace with your Google API key
+        API_KEY = "AIzaSyCdUX4c6TjixefRAef98sW9P-i5oGRHNQQ"  # Replace with your Google API key
         CSE_ID = "c3c5aefa71f5b4e29"  # Replace with your Custom Search Engine ID
         query = self.query
 

@@ -114,10 +114,71 @@ class MedicalMASUI:
 
 
 
+
+
+
+
+
+
+
+
+
         # Master Agent Output
         master_agent_output = tasks_output[3] if len(tasks_output) > 3 else "No output provided by this agent."
         st.header("Master Agent")
-        st.markdown(f"<p>{str(master_agent_output).replace('.', '.<br>')}</p>", unsafe_allow_html=True)
+
+
+
+        #GENERATING IMAGE AND WRAPPING IT AROUND THE MASTER AGENT TEXT
+        #Initial message for chatGPT to have some context
+        message = [{"role" : "assistant" , "content" : """
+            You need to take in the list of advice and return short search query to find an image based on the response.
+            I want nothing else in your output other then the sentence.
+        """}]
+
+        pprint(vars(st.session_state.result))
+        print("\n")
+
+        #Accessing the raw information and converting it into a string
+        information=tasks_output[3] # type: ignore
+        information= str(information)
+
+
+        #Adding that information to the message for GPT
+        message.append({"role": "user", "content": information})
+        chat_response = openai.chat.completions.create(model="gpt-4o-mini",messages=message) # type: ignore
+
+
+        #Getting the first reply
+        reply = chat_response.choices[0].message.content
+        print(reply)
+
+
+        #Using the reply as the parameter for the image generation
+        imageGeneration= GetImage(str(reply))
+
+
+        #Using the run method to generate the image links
+        imageURL= imageGeneration.run()
+        print(imageURL)
+        if imageURL:
+            imageURL= imageURL[0] 
+        else:
+            st.error("No image is available for this query")
+
+        if imageURL:
+            st.markdown(
+                f"""
+                    <div style="position: relative; overflow: hidden; line-height: 1.6;">
+                        <img src="{imageURL}" alt="Generated Image"
+                            style="float: left; width: 300px; height: auto; margin-right: 20px; margin-bottom: 10px; border-radius: 10px;">
+                        <p style="text-align: justify;">{str(master_agent_output).replace('.', '.<br>')}</p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(f"<p>{str(master_agent_output).replace('.', '.<br>')}</p>", unsafe_allow_html=True)
 
 
 
@@ -196,51 +257,8 @@ class MedicalMASUI:
             )
         elif st.session_state.generating:
             result = self.generate_medical_aid(st.session_state.query)
-
-
-            #Initial message for chatGPT to have some context
-            message = [{"role" : "assistant" , "content" : """
-            You need to take in the list of advice and return short search query to find an image based on the response.
-            I want nothing else in your output other then the sentence.
-            """}]
-
             #Setting the st.session_state in streamlit equal to the raw output from crewAI
             st.session_state.result = result
-            pprint(vars(st.session_state.result))
-            print("\n")
-
-            #Accessing the raw information and converting it into a string
-            information=st.session_state.result.tasks_output # type: ignore
-            information= str(information)
-
-            #Adding that information to the message for GPT
-            message.append({"role": "user", "content": information})
-            chat_response = openai.chat.completions.create(model="gpt-4o-mini",messages=message) # type: ignore
-            #Getting the first reply
-            reply = chat_response.choices[0].message.content
-            print(reply)
-
-            #Using the reply as the parameter for the image generation
-            imageGeneration= GetImage(str(reply))
-
-
-            #Using the run method to generate the image links
-            imageURL= imageGeneration.run()
-            print(imageURL)
-
-
-
-            #NEED TO DEBUG DOES NOT WORK PERFECTLY
-            #Displaying the image 
-            if imageURL: #If an imageIRL exists
-                st.image(imageURL[0]) # type: ignore
-            else:
-                st.error("No image for given event")#Otherwise display an error
-
-
-
-
-
             st.session_state.generating = False
 
         self.display_results(st.session_state.result)
@@ -261,6 +279,5 @@ if __name__ == "__main__":
 
 # Things to fix (try to do before the 6th):
 # 1) Images randommly dissaper and sometimes do not show up
-# 2) Formatting of the site
 # 3) Implemntation of Claude
 # 4) Ability to ask follow up questions
