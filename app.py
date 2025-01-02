@@ -257,7 +257,6 @@ if __name__ == "__main__":
     ui = MedicalMASUI()
     ui.run()
 
-st.write("This is a change")
 
 
 # Things to fix (try to do before the 6th):
@@ -265,3 +264,9 @@ st.write("This is a change")
 # 2) Formatting of the site
 # 3) Implemntation of Claude
 # 4) Ability to ask follow up questions
+
+
+
+
+st.write("This is a change")
+#This is a new change

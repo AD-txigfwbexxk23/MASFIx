@@ -29,6 +29,7 @@ class GetImage:
                     print(item["link"])
             else:
                 print("No items found in the response.")
+                print(data)
         except requests.exceptions.RequestException as e:
             print("Request error:", e)
         except ValueError as e:
