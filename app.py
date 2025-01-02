@@ -264,9 +264,3 @@ if __name__ == "__main__":
 # 2) Formatting of the site
 # 3) Implemntation of Claude
 # 4) Ability to ask follow up questions
-
-
-
-
-st.write("This is a change")
-#This is a new change
