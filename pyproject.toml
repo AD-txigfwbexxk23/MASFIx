@@ -12,6 +12,7 @@ pyowm = '3.3.0'
 python-dotenv = "1.0.0"
 langchain-openai = "^0.0.5"
 twilio = "^9.3.8"
+streamlit = "^1.41.1"
 
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md

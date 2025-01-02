@@ -58,14 +58,14 @@ class MedicalAgents:
             model="gpt-3.5-turbo",
             temperature=0.7,
             max_tokens=1500, #Adjust if the words are being cut for whatever reason # type: ignore
-            openai_api_key=os.environ.get("OPENAI_API_KEY", "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") # type: ignore
+            openai_api_key=os.environ.get("OPENAI_API_KEY", "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") # type: ignore
         )
         #ChatGPT 4o
         self.OpenAIGPT4 = ChatOpenAI(
             model="gpt-4",
             temperature=0.7,
             max_tokens=1500, #Adjust if the words are being cut for whatever reason # type: ignore
-            openai_api_key=os.environ.get("OPENAI_API_KEY", "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") # type: ignore
+            openai_api_key=os.environ.get("OPENAI_API_KEY", "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") # type: ignore
         )
         #Claude
         self.Claude = ChatAnthropic(
@@ -74,7 +74,6 @@ class MedicalAgents:
             temperature=0.7,
             anthropic_api_key=os.environ.get("ANTHROPIC_API_KEY", "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") # type: ignore
         )
-        print("Claude instance initialized:", self.Claude)
 
 
 
@@ -93,8 +92,12 @@ class MedicalAgents:
             goal=dedent(f"""
                         
             Deliver a fully verified and user-friendly emergency response.
-            Do this by coordinating subordinate agents and synthesizing their outputs into a cohesive plan.
-                        
+            Please do this by coordinating subordinate agents and synthesizing their outputs into a cohesive plan.
+            I also do not want anything that is not essential to the user. Remember, this is a life-or-death situation. 
+            Also, never suggest calling EMS as that will be done automatically. 
+            Although this is life or death, that does not mean you should not be thorough in your explanation of the steps and how to do what you are suggesting.
+            Also try and make your answer trustworthy to the user. 
+                                                
                         
                         """),
 
@@ -153,6 +156,7 @@ class MedicalAgents:
 
             verbose=True,
             llm=self.OpenAIGPT35,
+
         )
 
 
