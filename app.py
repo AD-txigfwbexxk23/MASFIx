@@ -1,7 +1,7 @@
 import streamlit as st
 import openai 
 from main import MedicalCrew
-from imageGeneration import GetImage
+from imageGeneration import getImage
 from dotenv import load_dotenv
 import os
 from pprint import pprint
@@ -154,12 +154,8 @@ class MedicalMASUI:
         print(reply)
 
 
-        #Using the reply as the parameter for the image generation
-        imageGeneration= GetImage(str(reply))
-
-
         #Using the run method to generate the image links
-        imageURL= imageGeneration.run()
+        imageURL= getImage(str(reply))
         print(imageURL)
         if imageURL:
             imageURL= imageURL[0] 
