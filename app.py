@@ -274,6 +274,5 @@ if __name__ == "__main__":
 
 
 # Things to fix (try to do before the 6th):
-# 1) Images randommly dissaper and sometimes do not show up
-# 3) Implemntation of Claude
-# 4) Ability to ask follow up questions
+# 1) Implemntation of Claude
+# 2) Ability to ask follow up questions
