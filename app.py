@@ -276,3 +276,4 @@ if __name__ == "__main__":
 # Things to fix (try to do before the 6th):
 # 1) Implemntation of Claude
 # 2) Ability to ask follow up questions
+# 3) Optionally facial recognition
