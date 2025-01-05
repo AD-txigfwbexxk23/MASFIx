@@ -1,8 +1,5 @@
 #ignore this in github
-
-# environment variables
+new_env/
+venv/
 .env
-
-#Cache folders
 __pycache__/
-

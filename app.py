@@ -5,7 +5,6 @@ from imageGeneration import getImage
 from dotenv import load_dotenv
 import os
 from pprint import pprint
-import pyttsx3
 from gtts import gTTS
 
 
@@ -14,13 +13,9 @@ from gtts import gTTS
 
 class MedicalMASUI:
 
-    #Initializing chatGPT and text to speech stuff (TEXT TO SPEECH WAS INITALIZED IN METHOD FOR NOW; NEED TO FIGURE OUT WHY)
     load_dotenv()
     api_key = os.getenv("OPENAI_API_KEY") 
     openai.api_key = api_key
-
-
-
 
 
 
@@ -105,6 +100,8 @@ class MedicalMASUI:
             ("Symptoms Analysis Agent", tasks_output[0] if len(tasks_output) > 0 else "No output provided by this agent."),
             ("Advisor Agent", tasks_output[1] if len(tasks_output) > 1 else "No output provided by this agent."),
             ("Verification Agent", tasks_output[2] if len(tasks_output) > 2 else "No output provided by this agent."),
+            ("Estimated User Proficiency", tasks_output[3] if len(tasks_output) > 3 else "No output provided by this agent."),
+
         ]
 
 
@@ -124,7 +121,7 @@ class MedicalMASUI:
 
 
         # Master Agent Output
-        master_agent_output = tasks_output[3] if len(tasks_output) > 3 else "No output provided by this agent."
+        master_agent_output = tasks_output[4] if len(tasks_output) > 4 else "No output provided by this agent."
         st.header("Master Agent")
 
 
@@ -270,13 +267,3 @@ class MedicalMASUI:
 if __name__ == "__main__":
     ui = MedicalMASUI()
     ui.run()
-
-
-
-# Things to fix (try to do before the 6th):
-# 1) Implemntation of Claude
-# 2) Ability to ask follow up questions
-# 3) Optionally facial recognition
-
-
-# I am making a change

@@ -2,31 +2,14 @@
 #Dec 11th, 2024
 #Agent Crew File
 
-
-
-from dotenv import load_dotenv
-import os
-
-
-# Load environment variables from .env
-load_dotenv()
-
-# Verify if the key is loaded
-print("OPENAI_API_KEY:", os.getenv("OPENAI_API_KEY"))
-print("Anthropic API Key:", os.getenv("ANTHROPIC_API_KEY"))
-
-
-
 #Imports:
 import os
-from crewai import Crew
-from textwrap import dedent
+from crewai import Crew, Process
 from agents import MedicalAgents
 from tasks import MedicalTasks
 from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
 load_dotenv()
-
-
 
 
 
@@ -35,53 +18,59 @@ class MedicalCrew:
 
     #Passing through all user input
     def __init__(self, query):
-
-        #Initalzing variables
         self.query = query
+        self.OpenAIGPT4 = ChatOpenAI(
+            model="gpt-4o-mini",
+            temperature=0.7,
+            max_tokens=1500, #Adjust if the words are being cut for whatever reason # type: ignore
+            openai_api_key=os.environ.get("OPENAI_API_KEY") # type: ignore
+        )
 
 
     #Run function:
     def run(self):
+
         #Initialzing the agents and tasks that were created in agents.py and tasks.py
         agents = MedicalAgents()
         tasks = MedicalTasks()
-
-        #Defining agents:
         masterAgent = agents.masterAgent()
         symptomAnalysisAgent = agents.symptomAnalysisAgent()
         advisorAgent = agents.advisorAgent()
         riskAssesmentAgent = agents.riskAssesmentAgent()
-        verificationAgents= [agents.verificationAgentOne(), agents.verificationAgentTwo(), agents.verificationAgentThree()]
-        #verificationAgentOne = agents.verificationAgentOne()
-        #verificationAgentTwo = agents.verificationAgentTwo()
-       #verificationAgentThree = agents.verificationAgentThree()
+        verificationAgent= agents.verificationAgent()
+        userProficiencyAgent = agents.userProficiencyAgent()
 
         #Defining Tasks:
         classifySymptoms = tasks.classifySymptoms(
             agent= symptomAnalysisAgent,
             query= self.query
         )
-
         recommendProtocol = tasks.recommendProtocol(
             agent= advisorAgent,
-            query= self.query
+            context= [classifySymptoms]
         )
-
         verifyRecommendation = tasks.verifyRecommendation(
-            agent= verificationAgents,
+            agent= verificationAgent,
+            context= [recommendProtocol]
+
+        )
+        checkUserMedicalKnowledge= tasks.checkUserMedicalKnowledge(
+            agent= userProficiencyAgent,
             query= self.query
         )
-
         escelateRisk = tasks.escelateRisk(
             agent= riskAssesmentAgent,
-            query= self.query
+            context=[recommendProtocol]
         )
 
         userExplination = tasks.userExplination(
             agent= masterAgent,
-            query= self.query
+            context= [classifySymptoms,recommendProtocol, verifyRecommendation]
         )
+
         
+
+
 
         # Define the crew of agents:
         crew = Crew(
@@ -90,45 +79,24 @@ class MedicalCrew:
                     symptomAnalysisAgent, 
                     advisorAgent, 
                     riskAssesmentAgent,
-                    *verificationAgents
+                    verificationAgent,
+                    userProficiencyAgent,
                     ],
 
             tasks=[classifySymptoms, 
                    recommendProtocol,
                    verifyRecommendation,
+                    checkUserMedicalKnowledge,
+                    escelateRisk,
                    userExplination,
-                   escelateRisk],
+                   ],
 
 
             verbose=True,
+            process=Process.sequential,
+            memory=True,
+            manager_llm=self.OpenAIGPT4,
         )
 
         result = crew.kickoff()
         return result
-
-
-
-
-
-#Main function to run crew:
-#This is subject to change later on
-if __name__ == "__main__":
-    #Printing a basic welcome message
-    print("## Welcome to the Medical Aid MAS ")
-    print('-------------------------------')
-
-
-#Basic query input
-    query = input(
-        dedent("""
-      What issue are you currently facing?
-    """))
-
-
-    medicalCrew= MedicalCrew(query)
-
-    result = medicalCrew.run()
-    print("\n\n########################")
-    print("## FINAL OVERVIEW")
-    print("########################\n")
-    print(result)

@@ -4,101 +4,25 @@
 
 
 
-# To know more about the Task class, visit: https://docs.crewai.com/concepts/tasks
 #Imports
 from crewai import Task
-from textwrap import dedent
-
-
-
-
-#Important Notes to task creation:
-"""
-Creating Tasks Cheat Sheet:
-- Begin with the end in mind. Identify the specific outcome your tasks are aiming to achieve.
-- Break down the outcome into actionable tasks, assigning each task to the appropriate agent.
-- Ensure tasks are descriptive, providing clear instructions and expected deliverables.
-
-
-
-Goal:
-- Provide a validated and user-friendly emergency response system to assist individuals in medical crises.
-
-
-Key Steps for Task Creation:
-1. Identify the Desired Outcome: Define what success looks like for your project.
-- Deliver accurate, actionable, and verified medical guidance to assist users in emergencies.
-
-2. Task Breakdown: Divide the goal into smaller, manageable tasks that agents can execute.
-- Symptom Classification: Analyze and classify the type and severity of the emergency.
-- Protocol Recommendation: Retrieve a step-by-step medical protocol tailored to the emergency.
-- Verification: Cross-check the protocol for accuracy using multiple independent systems.
-- User Explanation: Provide empathetic, clear guidance to the user.
-- Risk Escalation: Determine if escalation to emergency services is required.
-
-3. Assign Tasks to Agents: Match tasks with agents based on their roles and expertise.
-- Symptom Analysis Agent: Handles symptom classification
-- Protocol Advisor Agent: Recommends a protocol
-- Verification Agents: Independently verify the advice
-- Trust Enhancer Agent: Generates user explanations
-- Risk Assessment Agent: Manages risk escalation and calls AHS if thinks fit
-
-
-
-Template:
-  ---------
-  def [task_name](self, agent, [parameters]):
-      return Task(description=dedent(f'''
-      **Task**: [Provide a concise name or summary of the task.]
-      **Description**: [Detailed description of what the agent is expected to do, including actionable steps and expected outcomes. This should be clear and direct, outlining the specific actions required to complete the task.]
-
-      **Parameters**: 
-      - [Parameter 1]: [Description]
-      - [Parameter 2]: [Description]
-      ... [Add more parameters as needed.]
-
-      **Note**: [Optional section for incentives or encouragement for high-quality work. This can include tips, additional context, or motivations to encourage agents to deliver their best work.]
-
-      '''), agent=agent)
-
-"""
-
 
 
 #Creating class
 class MedicalTasks:
 
-    #Creating a tip incentive for the agents (According to the founders tutorial this seems to actually improve results)
-    def __tip_section(self):
-        return "If you do your BEST WORK, I'll give you a $10,000 commission!"
-
-
-
 
 
     #Classifying issue:
-    def classifySymptoms(self, *, agent, query):
+    def classifySymptoms(self, agent, query):
         return Task(
-            description=dedent(
-                f"""
-            
-                
-      **Task**: Symptom Classification
-
-      **Description**: Analyze the user's input to classify the medical emergency based on described symptoms.
-      The agent should:
-        - Extract key details from the user’s input (e.g., "choking," "difficulty breathing").
-        - Match symptoms to a predefined database of medical conditions or guidelines.
-        - Output a concise summary of the likely emergency type and severity.
-
-      **Parameters**: 
-      - Query: {query}
-
-      **Note**: {self.__tip_section}
-
-        """
+            description=(f""" 
+Analyze the user's input to classify the medical emergency based on described symptoms.
+Should match symptoms to a predefined database of medical conditions or guidelines.
+Output a concise summary of the likely emergency type and severity.
+The query is {query}
+            """
             ),
-            
             expected_output="A classification of the symptom",
             agent=agent,
         )
@@ -108,31 +32,20 @@ class MedicalTasks:
 
 
     #Reccomending a solution: 
-    def recommendProtocol(self, *, agent, query):
+    def recommendProtocol(self, agent, context):
         return Task(
-            description=dedent(
-                f"""
-            
-                
-      **Task**: Protocol Recommendation
-
-      **Description**: Retrieve and adapt specific medical protocols based on the classified emergency type. 
-      
-      The agent should:
-        - Query trusted medical resources (e.g., Red Cross, WHO, or internal databases).
-        - Adapt the protocol to user-specific contexts (e.g., age, known medical conditions).
-        - Provide a clear and actionable step-by-step action plan.
-
-      **Parameters**: 
-      - Query: {query}
-
-      **Note**: {self.__tip_section}
-
+            description=(f"""
+Retrieve and adapt specific medical protocols based on the classified emergency type and return a concise, actionable plan to solve the issue. 
+The agent shuld use trusted medical resources (e.g., Red Cross, WHO, or internal databases).
+Additionally, they should adapt the protocol to user-specific contexts (e.g., age, known medical conditions).
+Always ask follow up questions to gain better insight into the users issues.
+If the user has previous queries then those should be taken into to gain a holisitc idea of what could be wrong. 
         """
             ),
             
             expected_output="A list of steps to solve the issue",
             agent=agent,
+            context= context
         )
 
 
@@ -140,88 +53,67 @@ class MedicalTasks:
 
 
     #Verifying results:
-    def verifyRecommendation(self, *, agent, query):
+    def verifyRecommendation(self, agent, context):
         return Task(
-            description=dedent(
-                f"""
-            
-                
-      **Task**: Verification
-
-      **Description**: Cross-check the medical advice generated by other agents to ensure accuracy and consistency. 
-      The agent should:
-        - Query multiple independent sources (e.g., PubMed, Ollama, other AI systems).
-        - Identify and flag any discrepancies or potential errors.
-        - Provide a confidence score and a summary of the verification process.
-
-      **Parameters**: 
-      - Query: {query}
-
-      **Note**: {self.__tip_section}
-
+            description=(f"""
+Cross-check the medical advice generated by other agents to ensure accuracy and consistency. 
+Ensure they are using various independent sources (e.g., PubMed, Ollama, ISO Guidlines other AI systems).
+Identify and flag any discrepancies or potential errors.
         """
             ),
             
-            expected_output="Verify the results and ensure that what is being said aligns with ISO guidlines",
-            agent=agent[0],
+            expected_output="Verify the results and ensure that what is being said aligns with ISO guidlines and other trusted sources",
+            agent=agent,
+            context= context
+        )
+    
+
+    #Verifying results:
+    def checkUserMedicalKnowledge(self, agent, query):
+        return Task(
+            description=(f"""
+Analyze the language of the user to determine both their estimated age and their lvel of medical knowledge. 
+For example, if the user is using complex medical terms then they are likely to be a medical professional.
+If the user is using simple terms then they are likely to be a layman.
+        """
+            ),
+            
+            expected_output="an estimated age and proficiency level of the user, with a breif explination as to why.",
+            agent=agent,
         )
 
 
 
     #Calling EMS (if needed)
-    def escelateRisk(self, *, agent, query):
+    def escelateRisk(self, agent, context):
         return Task(
-            description=dedent(
-                f"""
-            
-                
-      **Task**: Symptom Classification
-
-      **Description**: Assess the risk level of the current situation and determine if escalation to emergency services is required. 
-      The agent should:
-        - Evaluate risk factors based on the emergency type and user condition.
-        - Decide whether immediate professional intervention is necessary.
-        - Provide instructions for escalation (e.g., advising the user to call 911 or automatically sending a notification).
-      
-      **Parameters**: 
-      - Query: {query}
-      
-      **Note**: {self.__tip_section}
-
+            description=(f"""               
+Assess the risk level of the current situation and determine if escalation to emergency services is required. 
+If escalation is deemed necessary then the agent should us tool to send emergency notifcation. 
         """
             ),
             
-            expected_output="Send a message based on the user status",
+            expected_output="Send a message based on the user status, only if needed",
             agent=agent,
+            context= context,
         )
     
 
 
 
     #Explaining steps:
-    def userExplination(self, *, agent, query):
+    def userExplination(self, agent, context):
         return Task(
-            description=dedent(
-                f"""
-            
-                
-      **Task**: Generate User Explanation
-
-      **Description**: Provide a clear and empathetic explanation of the verified medical advice. 
-      The agent should:
-        - Simplify technical terms into layman-friendly language.
-        - Explain the system's verification process to build user trust.
-        - Offer reassurance to the user with empathetic, encouraging feedback.
-
-      **Parameters**: 
-      - Query: {query}
-
-      **Note**: {self.__tip_section}
-
+            description=(f"""
+Provide a clear and empathetic explanation of the verified medical advice. 
+Additionally, the agent should, explain the system's verification process to build user trust.
+Always ask follow up questions to gain better insight into the users issues.
+If the user has previous queries then those should be taken into to gain a holisitc idea of what could be wrong.
         """
             ),
             
             expected_output="Provide an easy explination of how to solve the issue",
             agent=agent,
+            context= context,
         )
     
