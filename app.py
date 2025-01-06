@@ -90,7 +90,7 @@ class MedicalMASUI:
         #Getting all the task outputs
         tasks_output = getattr(result, 'tasks_output', [])
         if not isinstance(tasks_output, list):
-            st.warning("⚠️ tasks_output is not valid. Please check the backend.")
+            st.warning("⚠️ tasks_output is not valid.")
             tasks_output = []
 
 
@@ -121,7 +121,7 @@ class MedicalMASUI:
 
 
         # Master Agent Output
-        master_agent_output = tasks_output[4] if len(tasks_output) > 4 else "No output provided by this agent."
+        master_agent_output = tasks_output[5] if len(tasks_output) > 5 else "No output provided by this agent."
         st.header("Master Agent")
 
 
@@ -137,7 +137,7 @@ class MedicalMASUI:
         print("\n")
 
         #Accessing the raw information and converting it into a string
-        information=tasks_output[3] # type: ignore
+        information=tasks_output[5] # type: ignore
         information= str(information)
 
 
@@ -206,17 +206,6 @@ class MedicalMASUI:
             #Playing the audio
             st.audio("output.mp3")
                     
-
-
-
-
-
-
-
-
-
-
-
 
 
     def run(self):
