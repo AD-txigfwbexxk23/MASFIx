@@ -218,7 +218,7 @@ class MedicalMASUI:
         st.sidebar.text("Use this panel to interact with the system.")
 
         # Input query
-        query = st.sidebar.text_input(
+        st.sidebar.text_input(
             "Enter a medical query:", value=st.session_state.query, key="query"
         )
 
@@ -242,7 +242,7 @@ class MedicalMASUI:
             #Setting the st.session_state in streamlit equal to the raw output from crewAI
             st.session_state.result = result
             st.session_state.generating = False
-
+        
         self.display_results(st.session_state.result)
 
 

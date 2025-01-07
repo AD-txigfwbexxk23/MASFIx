@@ -4,25 +4,28 @@
 
 # Imports
 from crewai import Task
+from crewai.agent import Agent
+import typing
 
 # Creating class
 class MedicalTasks:
     
-    
+    past_queries = []
     
     
     
     # Classifying issue:
-    def classifySymptoms(self, agent=None, query=None, past_queries=None):
-        # Incorporate past queries into symptom classification
-        if past_queries:
-            query = f"{query}. Previous context: {past_queries}"
+    def classifySymptoms(self, agent: Agent, query: str, pastQueries: list[dict[str, typing.Any]] | typing.Any):
+
+        if not self.past_queries:
+            self.past_queries = pastQueries
         return Task(
             description=(f""" 
     Analyze the user's input to classify the medical emergency based on described symptoms.
     Should match symptoms to a predefined database of medical conditions or guidelines.
     Output a concise summary of the likely emergency type and severity.
     The query is {query}
+    The past queries are {self.past_queries}
             """),
             expected_output="A classification of the symptom",
             agent=agent,
@@ -35,19 +38,18 @@ class MedicalTasks:
         
         
         
-    def recommendProtocol(self, agent=None, context=None, past_queries=None):
+    def recommendProtocol(self, agent: Agent, context: list[Task], pastQueries: list[dict[str, typing.Any]] | typing.Any): #past_queries=None):
         # Use past queries to refine protocol recommendations
-        if past_queries:
-            if context is None:
-                context = []
-            context.append(past_queries)
+        if not self.past_queries:
+            self.past_queries = pastQueries
         return Task(
             description=(f"""
-    Retrieve and adapt specific medical protocols based on the classified emergency type and return a concise, actionable plan to solve the issue. 
+    Retrieve and adapt specific mwedical protocols based on the classified emergency type and return a concise, actionable plan to solve the issue. 
     The agent should use trusted medical resources (e.g., Red Cross, WHO, or internal databases).
     Additionally, they should adapt the protocol to user-specific contexts (e.g., age, known medical conditions).
     Always ask follow-up questions to gain better insight into the user's issues.
     If the user has previous queries, those should be taken into account to gain a holistic idea of what could be wrong. 
+    The past queries are {self.past_queries}
             """),
             expected_output="A list of steps to solve the issue",
             agent=agent,

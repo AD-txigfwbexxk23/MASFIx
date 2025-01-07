@@ -36,6 +36,7 @@ class MemoryManager:
     
     def retrieve_past_queries(self, agent, user_id="user-123"):
         memories = self.memory_client.search(
+            query="*",  # Fetch all past queries
             agent_id=agent.id,
             user_id=user_id,
             app_id="medical-mas",
