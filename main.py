@@ -23,19 +23,28 @@ class MedicalCrew:
         # Initialize memory client
         self.client = MemoryClient(api_key=os.environ.get("MEM0_API_KEY"))
 
+
+
+
+
     def fetch_past_queries(self):
         try:
             response = self.client.search(
                 query="*",  # Fetch all past queries
-                user_id="ZehaanWalji",
-                agent_id="MedicalAgent",
+                user_id="ZehaanWalji",  # Ensure user_id is passed
+                agent_id="MedicalAgent",  # Include agent_id for filtering
+                app_id="Medical MAS",  # Include app_id for filtering
                 limit=10,
                 sort="desc"
             )
-            return response.get("results", [])  # Safely return results or an empty list
+            return response  # Safely return results or an empty list
         except Exception as e:
             print(f"Error fetching past queries: {e}")
             return []
+
+
+
+
 
     def add_to_memory(self, query, messages):
         try:
@@ -43,10 +52,14 @@ class MedicalCrew:
                 query=query,
                 messages=messages,
                 user_id="ZehaanWalji",
-                agent_id="MedicalAgent"
+                agent_id="MedicalAgent",
+                app_id="Medical MAS"
             )
         except Exception as e:
             print(f"Error adding query to memory: {e}")
+
+
+
 
     def run(self):
         # Fetch past queries for context
@@ -65,17 +78,20 @@ class MedicalCrew:
         verificationAgent = agents.verificationAgent()
         userProficiencyAgent = agents.userProficiencyAgent()
 
+
+
         # Define tasks
         classifySymptoms = tasks.classifySymptoms(
             agent=symptomAnalysisAgent,
             query=self.query,
-            past_queries=past_queries
+            past_queries=past_queries + [{"role": "user", "content": self.query}]  # Combining the past queries and current query
+
         )
 
         recommendProtocol = tasks.recommendProtocol(
             agent=advisorAgent,
             context=[classifySymptoms],
-            past_queries=past_queries
+            past_queries=past_queries + [{"role": "user", "content": self.query}]  # Combine past queries and current query
         )
 
         verifyRecommendation = tasks.verifyRecommendation(
@@ -96,7 +112,7 @@ class MedicalCrew:
         userExplanation = tasks.userExplination(
             agent=masterAgent,
             context=[classifySymptoms, recommendProtocol, verifyRecommendation],
-            past_queries=past_queries
+            past_queries=past_queries + [{"role": "user", "content": self.query}]        
         )
 
         # Configure Crew

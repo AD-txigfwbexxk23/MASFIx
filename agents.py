@@ -31,17 +31,32 @@ class MemoryManager:
         if response.status_code != 200:
             raise Exception(f"Failed to store memory: {response.json()}")
         return response
-
+    
+    
+    
     def retrieve_past_queries(self, agent, user_id="user-123"):
         memories = self.memory_client.search(
             agent_id=agent.id,
             user_id=user_id,
             app_id="medical-mas",
         )
-        return [memory["query"] for memory in memories.get("data", [])]
+        print(f"Memories response: {memories}")
 
+        # If memories is a list, process it as such
+        if isinstance(memories, list):
+            return [memory.get("query", "") for memory in memories if isinstance(memory, dict)]  # Safely handle each memory as a dict
 
+        # If memories is a dictionary, extract "data" key
+        elif isinstance(memories, dict):
+            data = memories.get("data", [])
+            if isinstance(data, list):  # Ensure "data" is a list
+                return [memory.get("query", "") for memory in data if isinstance(memory, dict)]
+            else:
+                raise ValueError("Expected 'data' key to contain a list in the dictionary")
 
+        # If none of the above, raise an error
+        else:
+            raise ValueError("Unexpected response format from memory client")
 
 
 
@@ -99,8 +114,8 @@ class MedicalAgents:
             ),
             goal=(
                 f"""
-                Accurately classify the type and severity of the medical emergency.
-                """
+                Accurately classify the type and severity of the medical emergency. 
+    A lways consider the current query in the context of past queries to identify patterns or progression of symptoms.                """
             ),
             tools=[self.search_tools.search_internet],
             verbose=True,
